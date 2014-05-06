@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <link href="styles/main.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="Content/themes/base/jquery-ui.css" />
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script src="http://public.tableausoftware.com/javascripts/api/tableau_v8.js"></script>
     <script src="scripts/jquery-2.0.3.min.js"></script>
     <script src="scripts/jquery-ui-1.10.3.min.js"></script>
     <script src="scripts/knockout-2.3.0.js"></script>
@@ -25,6 +25,81 @@
             });
             
         }
+
+        function onMarksSelection(marksEvent) {
+            return marksEvent.getMarksAsync().then(reportSelectedMarks);
+        }
+
+        function reportSelectedMarks(marks) {
+            
+            var html = [];
+            var selectedRegion = "";
+            for (var markIndex = 0; markIndex < marks.length; markIndex++) {
+                var pairs = marks[markIndex].getPairs();
+                
+                for (var pairIndex = 0; pairIndex < pairs.length; pairIndex++) {
+                    var pair = pairs[pairIndex];
+                    if (pair.fieldName == "Region") {
+                        selectedRegion = pair.formattedValue;
+                    }
+                    
+                }
+                
+            }
+            if (marks.length > 0) {
+                var sel = $("#regionSelector");
+                switch (selectedRegion) {
+                case "East Asia and the Pacific":
+                    sel.val("Region6");
+                    break;
+                case "Europe and Central Asia":
+                    sel.val("Region1");
+                    break;
+                case "Latin America and the Caribbean":
+                    sel.val("Region2");
+                    break;
+                case "Middle East and North Africa":
+                    sel.val("Region3");
+                    break;
+                case "South Asia":
+                    sel.val("Region4");
+                    break;
+                case "Sub-Saharan Africa":
+                    sel.val("Region5");
+                    break;
+                
+                }
+
+                switchDashboard(sel);
+            }
+
+        }
+
+        var mapDashboard;
+        function initializeDashboard() {
+            var placeholderDiv = document.getElementById("mapDashboard");
+            var url = "http://public.tableausoftware.com/views/SampleDashboard2_2/Dashboard3";
+            var options = {
+                width: placeholderDiv.offsetWidth,
+                height: 580,
+                hideTabs: true,
+                hideToolbar: true,
+                onFirstInteractive: function () {
+                    workbook = mapDashboard.getWorkbook();
+                    activeSheet = workbook.getActiveSheet();
+                }
+            };
+            mapDashboard = new tableauSoftware.Viz(placeholderDiv, url, options);
+            mapDashboard.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
+        }
+
+        
+
+        $(function() {
+            initializeDashboard();
+            listenToMarksSelection();
+        });
+        
     </script>
 </head>
 <body>
@@ -72,45 +147,11 @@
 
             <div class="clear"></div>
 
-            <div>
-                <br />
-                <br />
-
-                <script type='text/javascript' src='http://public.tableausoftware.com/javascripts/api/viz_v1.js'>
-                </script>
-                <div class='tableauPlaceholder' style='width: 1000px; height: 600px;'>
-                    <noscript>
-                        <a href='#'>
-                            <img alt='Dashboard 3 ' src='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;Sa&#47;SampleDashboard2_2&#47;Dashboard3&#47;1_rss.png' style='border: none' />
-                        </a>
-                    </noscript>
-                    <object class='tableauViz' width='980' height='580' style='display:none;'>
-                        <param name='host_url' value='http%3A%2F%2Fpublic.tableausoftware.com%2F' />
-
-                        <param name='path' value='views&#47;SampleDashboard2_2&#47;Dashboard3' />
-
-                        <param name='toolbar' value='yes' />
-                        <param name='static_image' value='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;Sa&#47;SampleDashboard2_2&#47;Dashboard3&#47;1.png' />
-
-                        <param name='animate_transition' value='yes' />
-                        <param name='display_static_image' value='yes' />
-                        <param name='display_spinner' value='yes' />
-                        <param name='display_overlay' value='yes' />
-                        <param name='display_count' value='yes' />
-                        <param name='showVizHome' value='no' />
-                        <param name='showTabs' value='y' />
-                    </object>
-                </div>
-                <div style='width:604px;height:22px;padding:0px 10px 0px 0px;color:black;font:normal 8pt verdana,helvetica,arial,sans-serif;'>
-                    <div style='float:right; padding-right:8px;'>
-                        <a href='http://www.tableausoftware.com/public/about-tableau-products?ref=http://public.tableausoftware.com/views/SampleDashboard2_2/Dashboard3' target='_blank'>
-                            Learn About Tableau
-                        </a>
-                    </div>
-                </div>
+            <div id="mapDashboard" style="width: 100%">
+                
             </div>
 
-            Select Region: <select onchange="switchDashboard(this)">
+            Select Region: <select id="regionSelector" onchange="switchDashboard(this)">
                 <option value="Region1">Region 1</option>
                 <option value="Region2">Region 2</option>
                 <option value="Region3">Region 3</option>
