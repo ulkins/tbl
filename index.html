@@ -20,7 +20,7 @@
         function switchDashboard(select) {
             var selectedId = $(select).val();
             $("[id^='cbxLoan']").prop("checked", true);
-            
+            $("#loanDescription").text("All");
             switch (selectedId) {
                 case "Region1":
                     url = "http://public.tableausoftware.com/views/SampleDashboard-Region1/Dashboard4";
@@ -56,6 +56,7 @@
         }
 
         function onMarksSelection(marksEvent) {
+            debugger 
             return marksEvent.getMarksAsync().then(reportSelectedMarks);
         }
 
@@ -174,14 +175,23 @@
         }
 
         
+
         function initializeDashboard(divId, url, height, width, isDetails) {
             var placeholderDiv = document.getElementById(divId);
             var options = {
                 width: width!=undefined && width != null ? width : placeholderDiv.offsetWidth,
                 height: height,
                 hideTabs: true,
-                hideToolbar: true
-                
+                hideToolbar: true,
+                onFirstInteractive : function(ev) {
+                    var v = ev.getViz();
+                    if (!isDetails) {
+                        v.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
+                        var sel = $("#regionSelector");
+                        switchDashboard(sel[0]);
+                    }
+                }
+
             };
             
             var viz = new tableauSoftware.Viz(placeholderDiv, url, options);
@@ -189,21 +199,21 @@
                 detailsDashboard = viz;
             } else {
                 mapDashboard = viz;
+                
             }
             return viz;
         }
 
         function showLoanSizeSelector() {
             $("#loanSelector").dialog({modal: true});
-            //$("#loanSelector").show();
-            //$("#loanDescriptionWrapper").hide();
+            
         }
 
         $(function () {
             var sel = $("#regionSelector");
-            switchDashboard(sel[0]);
+            //switchDashboard(sel[0]);
             initializeDashboard("mapDashboard", "http://public.tableausoftware.com/views/SampleDashboard2_2/Dashboard3", 600, null, false);
-            mapDashboard.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
+            //mapDashboard.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
             
         });
 
