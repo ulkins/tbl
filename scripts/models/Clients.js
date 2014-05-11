@@ -4,6 +4,7 @@
         function Clients(host) {
             var _this = this;
             this.clientsData = ko.observableArray([]);
+            this.regions = ko.observableArray([]);
             this.imageClick = function(data) {
                 if (data.link != '') window.open(data.link);
             };
@@ -32,6 +33,13 @@
                         _this.clientsData.sort(function (a, b) {
                             var an = a.type + a.name;
                             var bn = b.type + b.name;
+                            return an == bn ? 0 : (an > bn ? 1 : -1);
+                        });
+                        break;
+                    case 'region':
+                        _this.clientsData.sort(function (a, b) {
+                            var an = a.region + a.name;
+                            var bn = b.region + b.name;
                             return an == bn ? 0 : (an > bn ? 1 : -1);
                         });
                         break;
@@ -126,6 +134,8 @@
                 for (var i = 1; i < arr.length; i++) {
                     if (arr[i][0] != '' && arr[i][1] != undefined) {
                         var type = arr[i][5].trim().toUpperCase();
+                        var region = arr[i][3].trim();
+                        var regionHref = region.replace(' ', '');
                         var typeDescr = '';
                         switch (type) {
                             case "MFI":
@@ -143,14 +153,23 @@
                             id: arr[i][0],
                             name: name,
                             link: arr[i][2],
-                            region: arr[i][3].trim(),
+                            region: region,
                             logo: arr[i][4],
                             type: type,
-                            typeDescr: typeDescr
+                            typeDescr: typeDescr,
+                            regionHref: regionHref
                         });
                     }
 
                 }
+                _this.sort('region', '');
+                for (var i = 0; i < _this.clientsData().length; i++) {
+                    var c = _this.clientsData()[i];
+                    if (_this.regions.indexOf(c.region) == -1) {
+                        _this.regions.push(c.region);
+                    }
+                }
+
                 _this.sort('alphabet', '');
                 for (var i = 0; i < _this.clientsData().length; i++) {
                     var c = _this.clientsData()[i];

@@ -23,15 +23,22 @@
                 <div style="margin: 20px 0; padding-left: 10px">
                     <div data-bind="visible: sortedBy() == 'alphabet'"><a href="#A" data-bind="attr: {href : anchorA}">[A - D]</a>&nbsp;&nbsp;&nbsp;<a href="#E" data-bind="attr: {href : anchorE}">[E - H]</a>&nbsp;&nbsp;&nbsp;<a href="#I" data-bind="attr: {href : anchorI}">[I - L]</a>&nbsp;&nbsp;&nbsp;<a href="#M" data-bind="attr: {href : anchorM}">[M - P]</a>&nbsp;&nbsp;&nbsp;<a href="#Q" data-bind="attr: {href : anchorQ}">[Q - T]</a>&nbsp;&nbsp;&nbsp;<a href="#U" data-bind="attr: {href : anchorU}">[U - Z]</a></div>
                     <div data-bind="visible: sortedBy() == 'type'"><a href="#MFI">[Microfinance Institution]</a>&nbsp;&nbsp;&nbsp;<a href="#SME">[SME Financial Institution]</a>&nbsp;&nbsp;&nbsp;<a href="#NON-MSME">[Non-MSME Financial Institution]</a></div>
-                </div>
+                    <div data-bind="visible: sortedBy() == 'region'">
+                        <!-- ko foreach: regions -->
+                            <a href="#" style="white-space: nowrap; margin-right: 10px" data-bind="text: '[' + $data + ']', attr: {href : '#' + $data.replace(/ /g, '')}"></a>
+                        <!-- /ko -->
+                    </div>
+                    </div>
                 <div style="padding-left: 10px">
                     <div class="sortByDiv" data-bind="css: sortedBy() == 'alphabet' ? 'textSym' : 'linkSym'"><a data-bind="click: function() { sort('alphabet');}" href="#">[Sort by name]</a></div>
-                    <div class="sortByDiv" data-bind="css: sortedBy() == 'alphabet' ? 'linkSym' : 'textSym'"><a data-bind="click: function() { sort('type');}" href="#">[Sort by type]</a></div>
+                    <div class="sortByDiv" data-bind="css: sortedBy() == 'type' ? 'textSym' : 'linkSym'"><a data-bind="click: function() { sort('type');}" href="#">[Sort by type]</a></div>
+                    <div class="sortByDiv" data-bind="css: sortedBy() == 'region' ? 'textSym' : 'linkSym'"><a data-bind="click: function() { sort('region');}" href="#">[Sort by region]</a></div>
                     <div class="clear" ></div>
                 </div>
                 <div data-bind="foreach: clientsData">
                     <span data-bind="attr : {id : name.charAt(0)}" ></span>
                     <span data-bind="attr : {id : type}"></span>
+                    <span data-bind="attr : {id : region.replace(/ /g, '')}"></span>
                     <div class="clientLogo">
                         <!-- ko if: logo != '' && logo != undefined -->
                         <img style="height: 50px" data-bind="click: $parent.imageClick, attr: {src: 'images/logos/' + logo}, style : { cursor: link != '' ? 'pointer' : 'default' }" />
