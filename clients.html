@@ -20,27 +20,36 @@
         <div id="main">
             <div id="leftColumn" class="methodology" style="height: auto">
                 <div id="top" style="font-size: 1.2em;">IFC is collaborating with 314 financial institutions across 90 countries. By partnering with many types of financial intermediaries, including microfinance institutions, commercial banks, leasing companies, and private equity funds, IFC reaches many more small and medium enterprises that it could directly. Learn more about our clients.<br/></div>
-		
-                <div ></br></br><a href="#A">[A - D]</a>&nbsp;&nbsp;&nbsp;<a href="#E">[E - H]</a>&nbsp;&nbsp;&nbsp;<a href="#I">[I - L]</a>&nbsp;&nbsp;&nbsp;<a href="#M">[M - P]</a>&nbsp;&nbsp;&nbsp;<a href="#Q">[Q - T]</a>&nbsp;&nbsp;&nbsp;<a href="#U">[U - Z]</a></div>
+                <div style="margin: 20px 0; padding-left: 10px">
+                    <div data-bind="visible: sortedBy() == 'alphabet'"><a href="#A" data-bind="attr: {href : anchorA}">[A - D]</a>&nbsp;&nbsp;&nbsp;<a href="#E" data-bind="attr: {href : anchorE}">[E - H]</a>&nbsp;&nbsp;&nbsp;<a href="#I" data-bind="attr: {href : anchorI}">[I - L]</a>&nbsp;&nbsp;&nbsp;<a href="#M" data-bind="attr: {href : anchorM}">[M - P]</a>&nbsp;&nbsp;&nbsp;<a href="#Q" data-bind="attr: {href : anchorQ}">[Q - T]</a>&nbsp;&nbsp;&nbsp;<a href="#U" data-bind="attr: {href : anchorU}">[U - Z]</a></div>
+                    <div data-bind="visible: sortedBy() == 'type'"><a href="#MFI">[Microfinance Institution]</a>&nbsp;&nbsp;&nbsp;<a href="#SME">[SME Financial Institution]</a>&nbsp;&nbsp;&nbsp;<a href="#NON-MSME">[Non-MSME Financial Institution]</a></div>
+                </div>
+                <div style="padding-left: 10px">
+                    <div class="sortByDiv" data-bind="css: sortedBy() == 'alphabet' ? 'textSym' : 'linkSym'"><a data-bind="click: function() { sort('alphabet');}" href="#">[Sort by name]</a></div>
+                    <div class="sortByDiv" data-bind="css: sortedBy() == 'alphabet' ? 'linkSym' : 'textSym'"><a data-bind="click: function() { sort('type');}" href="#">[Sort by type]</a></div>
+                    <div class="clear" ></div>
+                </div>
                 <div data-bind="foreach: clientsData">
-                    <!-- ko if: $index() == 0 || ($index() >= 1 && $parent.clientsData()[$index()-1].name.charAt(0) != name.charAt(0)) -->
-                    <div style="padding-top: 10px"><a data-bind="visible: $index() >= 1" href="#top">[Back to top]</a></div>
-                    <div style="padding-top: 30px; font-weight: bold" data-bind="text: name.charAt(0), attr : {id : name.charAt(0)}"></div>
-                    <!-- /ko -->
-                    <div>
-                        <div style="float: left; padding-top: 20px;">
+                    <span data-bind="attr : {id : name.charAt(0)}" ></span>
+                    <span data-bind="attr : {id : type}"></span>
+                    <div class="clientLogo">
+                        <!-- ko if: logo != '' && logo != undefined -->
+                        <img style="height: 50px" data-bind="click: $parent.imageClick, attr: {src: 'images/logos/' + logo}, style : { cursor: link != '' ? 'pointer' : 'default' }" />
+                        <!-- /ko -->
+                    </div>
+                    <div class="clientDescription">
+                        <div>
                             <a target="_blank" data-bind="visible: link != '', text: name, attr: {href: link}"></a>
-                            <span data-bind="visible: link == '', text: name"></span><span data-bind="text: ', ' +country"></span>
+                            <span data-bind="visible: link == '', text: name"></span>
                         </div>
-                       <div style="float: left; padding: 5px 10px">
-                            <!-- ko if: logo != '' && logo != undefined -->
-                            <img style="height: 50px" data-bind="attr: {src: 'images/logos/' + logo}" />
-                            <!-- /ko -->
+                        <div data-bind="text: region">
                         </div>
-                        <div style="clear: left" ></div>
+                        <div data-bind="text: typeDescr">
                         </div>
-                 </div>
-                <div style="padding-top: 10px"><a data-bind="visible: $index() >= 1" href="#top">[Back to top]</a></div>
+                    </div>
+                    <div class="clear"></div>   
+                </div>
+                
 
 
 

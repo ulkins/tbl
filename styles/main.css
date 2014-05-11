@@ -472,3 +472,30 @@ line-height: 15px;
 .text-right {
     text-align: right;
 }
+
+.clientLogo, .clientDescription, .sortByDiv {
+    float: left;
+}
+
+.sortByDiv {
+    padding-right: 10px;
+    padding-bottom: 10px;
+}
+
+.textSym a {
+    text-decoration: none;
+    cursor: default;
+    color: black;
+}
+
+.clientLogo {
+    padding: 20px;
+    margin: 0px 10px 10px 10px;
+    border: 1px solid lightgrey;
+    width: 50px;
+    height: 50px;
+}
+
+.clientLogo img {
+    width: 50px;
+}

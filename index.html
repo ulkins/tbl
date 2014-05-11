@@ -14,16 +14,44 @@
     <script src="scripts/sprintf.js"></script>
     
     <script type="text/javascript">
+        //var detailsDashboard = null;
         function switchDashboard(select) {
             var selectedId = $(select).val();
-            $("[id^='DashboardRegion']").each(function (index, data) {
-                if ($(data).attr("id") != 'Dashboard' + selectedId) {
-                    $(data).css('display', 'none');
-                } else {
-                    $(data).css('display', 'block');
-                }
-            });
-            
+            $("[id^='cbxLoan']").prop("checked", true);
+            var vizs = tableauSoftware.VizManager.getVizs();
+            var detailsDashboard = vizs.length > 1 ? vizs[1] : null;
+            var url = "";
+            switch (selectedId) {
+                case "Region1":
+                    url = "http://public.tableausoftware.com/views/SampleDashboard-Region1/Dashboard4";
+                    break;
+                case "Region2":
+                    url = "http://public.tableausoftware.com/views/SampleDashboard-Region2/Dashboard5";
+                    break;
+                case "Region3":
+                    url = "";
+                    break;
+                case "Region4":
+                    url = "";
+                    break;
+                case "Region5":
+                    url = "";
+                    break;
+                case "Region6":
+                    url = "";
+                    break;
+                case "RegionWorld":
+                    url = "";
+                    break;
+            }
+            if (url != "") {
+                if (detailsDashboard != null) detailsDashboard.dispose();
+                $("#detailsDashboard").html("");
+                initializeDashboard("detailsDashboard", url, 869, 1004);
+            } else {
+                if (detailsDashboard != null) detailsDashboard.dispose();
+                $("#detailsDashboard").html("[" + selectedId + " Placeholder]");
+            }
         }
 
         function onMarksSelection(marksEvent) {
@@ -67,39 +95,90 @@
                 case "Sub-Saharan Africa":
                     sel.val("Region5");
                     break;
-                
                 }
-
                 switchDashboard(sel);
             }
 
         }
 
+        function loanSizeParameterChanged(cbx) {
+            var vizs = tableauSoftware.VizManager.getVizs();
+            var detailsDashboard = vizs.length > 1 ? vizs[1] : null;
+            var cb = $(cbx);
+            var val = cb.val();
+            var checked = cb.prop("checked");
+            switch (val) {
+                case "All":
+                    $("[id^='cbxLoan']").prop("checked", checked);
+                    break;
+                case "Sme":
+                    $("#cbxLoanSmall, #cbxLoanMedium").prop("checked", checked);
+                    break;
+                case "Small":
+                case "Medium":
+                    if ($("#cbxLoanSmall").prop("checked") && $("#cbxLoanMedium").prop("checked")) {
+                        $("#cbxLoanSme").prop("checked", true);
+                    } else {
+                        $("#cbxLoanSme").prop("checked", false);
+                    }
+                    break;
+            }
+            if ($("#cbxLoanSmall").prop("checked") && $("#cbxLoanMedium").prop("checked") && $("#cbxLoanRetail").prop("checked")
+                && $("#cbxLoanCorporate").prop("checked") && $("#cbxLoanMicro").prop("checked")) {
+                $("#cbxLoanAll").prop("checked", true);
+            } else {
+                $("#cbxLoanAll").prop("checked", false);
+            }
+
+            var filter = [];
+            $("[id^='cbxLoan']:checked").each(function(index) {
+                filter[index] = $(this).val();
+            });
+            //if (detailsDashboard != null) {
+                 
+            //    workbook.activateSheetAsync("Sheet 14").then(function () {
+                     
+            //        workbook.getActiveSheet().applyFilterAsync("Loan Size", filter, tableauSoftware.FilterUpdateType.REPLACE);
+            //        //var worksheets = detailsDashboard.getWorkbook().getActiveSheet().getWorksheets();
+            //        //for (var i = 0; i < worksheets.length; i++) {
+            //        //    var ws = worksheets[i];
+            //        //    ws.getFiltersAsync().then(function(data) {
+            //        //        debugger;
+            //        //    });
+            //        //}
+            //    }, function(err) { });
+            //    //detailsDashboard.getWorkbook().getpgetActiveSheet().getWorksheets()[0].applyFilterAsync("Loan Size", filter, tableauSoftware.FilterUpdateType.REPLACE);
+            //}
+        }
+
         var mapDashboard;
-        function initializeDashboard() {
-            var placeholderDiv = document.getElementById("mapDashboard");
-            var url = "http://public.tableausoftware.com/views/SampleDashboard2_2/Dashboard3";
+        var workbook, activeSheet;
+        function initializeDashboard(divId, url, height, width) {
+            var placeholderDiv = document.getElementById(divId);
+            //var url = "http://public.tableausoftware.com/views/SampleDashboard2_2/Dashboard3";
             var options = {
-                width: placeholderDiv.offsetWidth,
-                height: 580,
+                width: width!=undefined ? width : placeholderDiv.offsetWidth,
+                height: height,
                 hideTabs: true,
                 hideToolbar: true,
-                onFirstInteractive: function () {
-                    workbook = mapDashboard.getWorkbook();
+                onFirstInteractive: function (ev) {
+                    workbook = ev.getViz().getWorkbook();
                     activeSheet = workbook.getActiveSheet();
                 }
             };
-            mapDashboard = new tableauSoftware.Viz(placeholderDiv, url, options);
-            mapDashboard.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
+            return new tableauSoftware.Viz(placeholderDiv, url, options);
+            
         }
 
         
 
         $(function() {
-            initializeDashboard();
-            listenToMarksSelection();
+            mapDashboard = initializeDashboard("mapDashboard", "http://public.tableausoftware.com/views/SampleDashboard2_2/Dashboard3", 600);
+            mapDashboard.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
+            var sel = $("#regionSelector");
+            switchDashboard(sel);
         });
-        
+
     </script>
 </head>
 <body>
@@ -151,38 +230,51 @@
                 
             </div>
 
-            Select Region: <select id="regionSelector" onchange="switchDashboard(this)">
-                <option value="Region1">Region 1</option>
-                <option value="Region2">Region 2</option>
-                <option value="Region3">Region 3</option>
-                <option value="Region4">Region 4</option>
-                <option value="Region5">Region 5</option>
-                <option value="Region6">Region 6</option>
-                <option value="RegionWorld">World</option>
-            </select>
-            <div id="DashboardRegion1">
-                <script type='text/javascript' src='http://public.tableausoftware.com/javascripts/api/viz_v1.js'></script><div class='tableauPlaceholder' style='width: 1004px; height: 869px;'><noscript><a href='#'><img alt='Portfolio Composition for Region 1Select FI Type, Indicator and Loan Size ' src='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;Y9&#47;Y9JP7NKH4&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz' width='1004' height='869' style='display:none;'><param name='host_url' value='http%3A%2F%2Fpublic.tableausoftware.com%2F' /> <param name='path' value='shared&#47;Y9JP7NKH4' /> <param name='toolbar' value='yes' /><param name='static_image' value='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;Y9&#47;Y9JP7NKH4&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='showVizHome' value='no' /><param name='showTabs' value='y' /></object></div>
+            <div>Select Region: <select id="regionSelector" onchange="switchDashboard(this)">
+                                    <option value="Region1">Region 1</option>
+                                    <option value="Region2">Region 2</option>
+                                    <option value="Region3">Region 3</option>
+                                    <option value="Region4">Region 4</option>
+                                    <option value="Region5">Region 5</option>
+                                    <option value="Region6">Region 6</option>
+                                    <option value="RegionWorld">World</option>
+                                </select>
             </div>
-            <div id="DashboardRegion2" style="display: none">
-                <script type='text/javascript' src='http://public.tableausoftware.com/javascripts/api/viz_v1.js'></script><div class='tableauPlaceholder' style='width: 1004px; height: 869px;'><noscript><a href='#'><img alt='Dashboard 5 ' src='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;H8&#47;H8B495KB8&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz' width='1004' height='869' style='display:none;'><param name='host_url' value='http%3A%2F%2Fpublic.tableausoftware.com%2F' /> <param name='path' value='shared&#47;H8B495KB8' /> <param name='toolbar' value='yes' /><param name='static_image' value='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;H8&#47;H8B495KB8&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='showVizHome' value='no' /><param name='showTabs' value='y' /></object></div>
+            <!--<div>
+                <div>Select loan size: </div>
+                <div>All <input type="checkbox" id="cbxLoanAll" checked="checked" onchange="loanSizeParameterChanged(this)" value="All" /></div>
+                <div>Retail <input type="checkbox" id="cbxLoanRetail" checked="checked" onchange="loanSizeParameterChanged(this)" value="Retail" /></div>
+                <div>Micro <input type="checkbox" id="cbxLoanMicro" checked="checked" onchange="loanSizeParameterChanged(this)" value="Micro" /></div>
+                <div>SME <input type="checkbox" id="cbxLoanSme" checked="checked" onchange="loanSizeParameterChanged(this)" value="Sme" /></div>
+                <div style="padding-left: 20px">Small <input type="checkbox" id="cbxLoanSmall" checked="checked" onchange="loanSizeParameterChanged(this)" value="Small" /></div>
+                <div style="padding-left: 20px">Medium <input type="checkbox" id="cbxLoanMedium" checked="checked" onchange="loanSizeParameterChanged(this)" value="Medium" /></div>
+                <div>Corporate <input type="checkbox" id="cbxLoanCorporate" checked="checked" onchange="loanSizeParameterChanged(this)" value="Corporate" /></div>
+            </div>-->
+            <div id="detailsDashboard" style="width: 100%">
             </div>
-            <div id="DashboardRegion3" style="display: none">
-                [Region3 Placeholder]
-            </div>
-            <div id="DashboardRegion4" style="display: none">
-                [Region4 Placeholder]
-            </div>
-            <div id="DashboardRegion5" style="display: none">
-                [Region5 Placeholder]
-            </div>
-            <div id="DashboardRegion6" style="display: none">
-                [Region6 Placeholder]
-            </div>
-            <div id="DashboardRegionWorld" style="display: none">
-                [World Placeholder]
-            </div>
+                <!--<div id="DashboardRegion1">
+                    <script type='text/javascript' src='http://public.tableausoftware.com/javascripts/api/viz_v1.js'></script><div class='tableauPlaceholder' style='width: 1004px; height: 869px;'><noscript><a href='#'><img alt='Portfolio Composition for Region 1Select FI Type, Indicator and Loan Size ' src='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;Y9&#47;Y9JP7NKH4&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz' width='1004' height='869' style='display:none;'><param name='host_url' value='http%3A%2F%2Fpublic.tableausoftware.com%2F' /> <param name='path' value='shared&#47;Y9JP7NKH4' /> <param name='toolbar' value='yes' /><param name='static_image' value='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;Y9&#47;Y9JP7NKH4&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='showVizHome' value='no' /><param name='showTabs' value='y' /></object></div>
+                </div>
+                <div id="DashboardRegion2" style="display: none">
+                    <script type='text/javascript' src='http://public.tableausoftware.com/javascripts/api/viz_v1.js'></script><div class='tableauPlaceholder' style='width: 1004px; height: 869px;'><noscript><a href='#'><img alt='Dashboard 5 ' src='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;H8&#47;H8B495KB8&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz' width='1004' height='869' style='display:none;'><param name='host_url' value='http%3A%2F%2Fpublic.tableausoftware.com%2F' /> <param name='path' value='shared&#47;H8B495KB8' /> <param name='toolbar' value='yes' /><param name='static_image' value='http:&#47;&#47;public.tableausoftware.com&#47;static&#47;images&#47;H8&#47;H8B495KB8&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='showVizHome' value='no' /><param name='showTabs' value='y' /></object></div>
+                </div>
+                <div id="DashboardRegion3" style="display: none">
+                    [Region3 Placeholder]
+                </div>
+                <div id="DashboardRegion4" style="display: none">
+                    [Region4 Placeholder]
+                </div>
+                <div id="DashboardRegion5" style="display: none">
+                    [Region5 Placeholder]
+                </div>
+                <div id="DashboardRegion6" style="display: none">
+                    [Region6 Placeholder]
+                </div>
+                <div id="DashboardRegionWorld" style="display: none">
+                    [World Placeholder]
+                </div>-->
 
-        </div>
+            </div>
     </div>
 
     <div id="footer">

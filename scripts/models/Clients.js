@@ -2,9 +2,43 @@
 (function(models) {
     var Clients = (function () {
         function Clients(host) {
-            this.clientsData = ko.observableArray([]);
-            this.groupedClientsData = ko.observableArray([]);
             var _this = this;
+            this.clientsData = ko.observableArray([]);
+            this.imageClick = function(data) {
+                if (data.link != '') window.open(data.link);
+            };
+            this.sortedBy = ko.observable('alphabet');
+            this.sortedDirection = ko.observable('asc');
+            this.anchorA = ko.observable('');
+            this.anchorE = ko.observable('');
+            this.anchorI = ko.observable('');
+            this.anchorM = ko.observable('');
+            this.anchorQ = ko.observable('');
+            this.anchorU = ko.observable('');
+            this.anchorMfi = ko.observable('');
+            this.anchorSme = ko.observable('');
+            this.anchorNonSme = ko.observable('');
+            this.sort = function (sortBy, sortDirection) {
+                _this.sortedBy(sortBy);
+                switch (sortBy) {
+                    case 'alphabet':
+                        _this.clientsData.sort(function (a, b) {
+                            var an = a.name + a.type;
+                            var bn = b.name + b.type;
+                            return an == bn ? 0 : (an > bn ? 1 : -1);
+                        });
+                        break;
+                    case 'type':
+                        _this.clientsData.sort(function (a, b) {
+                            var an = a.type + a.name;
+                            var bn = b.type + b.name;
+                            return an == bn ? 0 : (an > bn ? 1 : -1);
+                        });
+                        break;
+                }
+            }
+            this.groupedClientsData = ko.observableArray([]);
+            
             var parseFile = function( strData, strDelimiter ){
                 // Check to see if the delimiter is defined. If not,
                 // then default to comma.
@@ -91,21 +125,57 @@
                 
                 for (var i = 1; i < arr.length; i++) {
                     if (arr[i][0] != '' && arr[i][1] != undefined) {
+                        var type = arr[i][5].trim().toUpperCase();
+                        var typeDescr = '';
+                        switch (type) {
+                            case "MFI":
+                                typeDescr = "Microfinance Institution";
+                                break;
+                            case "SME":
+                                typeDescr = "SME Financial Institution";
+                                break;
+                            case "NON-MSME":
+                                typeDescr = "Non-MSME Financial Institution";
+                                break;
+                        };
+                        var name = arr[i][1].trim();
                         _this.clientsData.push({
                             id: arr[i][0],
-                            name: arr[i][1].trim(),
+                            name: name,
                             link: arr[i][2],
                             region: arr[i][3].trim(),
-                            country: arr[i][4].trim(),
-                            logo: arr[i][5]
+                            logo: arr[i][4],
+                            type: type,
+                            typeDescr: typeDescr
                         });
                     }
 
                 }
-               _this.clientsData.sort(function(a, b) {
-                    return a.name == b.name ? 0 : (a.name > b.name ? 1 : -1);
-                });
-                debugger 
+                _this.sort('alphabet', '');
+                for (var i = 0; i < _this.clientsData().length; i++) {
+                    var c = _this.clientsData()[i];
+                    var s = c.name.charAt(0);
+                    if (_this.anchorA() == '' && (s == 'A' || s == 'B' || s == 'C' || s == 'D')) {
+                        _this.anchorA('#' + s);
+                    }
+                    if (_this.anchorE() == '' && (s == 'E' || s == 'F' || s == 'G' || s == 'H')) {
+                        _this.anchorE('#' + s);
+                    }
+                    if (_this.anchorI() == '' && (s == 'I' || s == 'J' || s == 'K' || s == 'L')) {
+                        _this.anchorI('#' + s);
+                    }
+                    if (_this.anchorM() == '' && (s == 'M' || s == 'N' || s == 'O' || s == 'P')) {
+                        _this.anchorM('#' + s);
+                    }
+                    if (_this.anchorQ() == '' && (s == 'Q' || s == 'R' || s == 'S' || s == 'T')) {
+                        _this.anchorQ('#' + s);
+                    }
+                    if (_this.anchorU() == '' && (s == 'U' || s == 'V' || s == 'W' || s == 'X' || s == 'Y'|| s == 'Z')) {
+                        _this.anchorU('#' + s);
+                    }
+                    
+
+                }
             });
         }
 
