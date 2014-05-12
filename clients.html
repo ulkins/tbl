@@ -36,26 +36,28 @@
                     <div class="clear" ></div>
                 </div>
                 <div data-bind="foreach: clientsData">
-                    <span data-bind="attr : {id : name.charAt(0)}" ></span>
-                    <span data-bind="attr : {id : type}"></span>
-                    <span data-bind="attr : {id : region.replace(/ /g, '')}"></span>
-                    <div class="clientLogo">
-                        <!-- ko if: logo != '' && logo != undefined -->
-                        <img style="height: 50px" data-bind="click: $parent.imageClick, attr: {src: 'images/logos/' + logo}, style : { cursor: link != '' ? 'pointer' : 'default' }" />
-                        <!-- /ko -->
+                    <div class="clientDiv">
+                        <span data-bind="attr : {id : name.charAt(0)}"></span>
+                        <span data-bind="attr : {id : type}"></span>
+                        <span data-bind="attr : {id : region.replace(/ /g, '')}"></span>
+                        <div class="clientLogo">
+                            <!-- ko if: logo != '' && logo != undefined -->
+                            <img data-bind="click: $parent.imageClick, attr: {src: 'images/logos/' + logo}, style : { cursor: link != '' ? 'pointer' : 'default' }" />
+                            <!-- /ko -->
+                        </div>
+                        <div class="clientDescription">
+                            <div class="clientTitle">
+                                <a target="_blank" data-bind="visible: link != '', text: name, attr: {href: link}"></a>
+                                <span data-bind="visible: link == '', text: name"></span>
+                            </div>
+                            <div style="margin-bottom: 5px" data-bind="text: region">
+                            </div>
+                            <div data-bind="text: typeDescr">
+                            </div>
+                        </div>
+                        <div class="clear"></div>
                     </div>
-                    <div class="clientDescription">
-                        <div>
-                            <a target="_blank" data-bind="visible: link != '', text: name, attr: {href: link}"></a>
-                            <span data-bind="visible: link == '', text: name"></span>
-                        </div>
-                        <div data-bind="text: region">
-                        </div>
-                        <div data-bind="text: typeDescr">
-                        </div>
                     </div>
-                    <div class="clear"></div>   
-                </div>
                 
 
 

@@ -492,10 +492,26 @@ line-height: 15px;
     padding: 20px;
     margin: 0px 10px 10px 10px;
     border: 1px solid lightgrey;
-    width: 50px;
+    width: 80px;
     height: 50px;
 }
 
 .clientLogo img {
-    width: 50px;
+    height: 50px;
+    width: 80px;
 }
+
+.clientTitle {
+    font-size: 1.4em;
+    margin-bottom: 5px;
+}
+
+.clientDiv {
+    width: 370px;
+    float: left;
+}
+
+.clientDescription {
+    width: 200px;
+}
+
