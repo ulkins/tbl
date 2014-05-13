@@ -300,10 +300,11 @@ border-top: none;*/
 #bottom-left {
     float: left;
     padding: 0px 18px 0px 9px;
-    width: 39%;
+    width: 80%;
     font-size: 1.2em;
     line-height: 20px;
     text-align: justify;
+    border-right: solid 1px #DDD;
 }
 
     #bottom-left img {

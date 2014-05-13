@@ -17,90 +17,64 @@
         var mapDashboard = null;
         var detailsDashboard = null;
         var workbook, activeSheet;
-        function switchDashboard(select) {
-            var selectedId = $(select).val();
-            $("[id^='cbxLoan']").prop("checked", true);
-            $("#loanDescription").text("All");
-            switch (selectedId) {
-                case "Region1":
-                    url = "http://public.tableausoftware.com/views/SampleDashboard-Region1/Dashboard4";
-                    break;
-                case "Region2":
-                    url = "http://public.tableausoftware.com/views/SampleDashboard-Region2/Dashboard5";
-                    break;
-                case "Region3":
-                    url = "";
-                    break;
-                case "Region4":
-                    url = "";
-                    break;
-                case "Region5":
-                    url = "";
-                    break;
-                case "Region6":
-                    url = "";
-                    break;
-                case "RegionWorld":
-                    url = "";
-                    break;
-            }
-            if (url != "") {
-                if (detailsDashboard != null) detailsDashboard.dispose();
-                $("#detailsDashboard").html("");
-                initializeDashboard("detailsDashboard", url, 869, 1004, true);
+        function switchDashboard(selectedId) {
+            //var selectedId = $(select).val();
+
+            if (selectedId[0] != "None") {
+                $("#detailsNoSelection").hide();
+                $("#tabs").show();
+
 
             } else {
-                if (detailsDashboard != null) detailsDashboard.dispose();
-                $("#detailsDashboard").html("[" + selectedId + " Placeholder]");
+                $("#detailsNoSelection").show();
+                $("#tabs").hide();
             }
+
+            var worksheets = detailsDashboard.getWorkbook().getActiveSheet().getWorksheets();
+            for (var i = 0; i < worksheets.length; i++) {
+                var ws = worksheets[i];
+                ws.applyFilterAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
+
+            }
+
+            
         }
 
         function onMarksSelection(marksEvent) {
-            debugger 
+            
             return marksEvent.getMarksAsync().then(reportSelectedMarks);
         }
 
+        var doNotSkipEvent = true;
+        var firstMarks = null;
         function reportSelectedMarks(marks) {
-            
-            var html = [];
-            var selectedRegion = "";
-            for (var markIndex = 0; markIndex < marks.length; markIndex++) {
-                var pairs = marks[markIndex].getPairs();
-                
-                for (var pairIndex = 0; pairIndex < pairs.length; pairIndex++) {
-                    var pair = pairs[pairIndex];
-                    if (pair.fieldName == "Region") {
-                        selectedRegion = pair.formattedValue;
+            debugger;
+            doNotSkipEvent = !doNotSkipEvent;
+            if (!doNotSkipEvent) {
+                firstMarks = marks;
+            } else {
+                if (firstMarks.length == 0 && marks.length == 0) {
+                    switchDashboard(["None"]);
+                } else {
+                    if (firstMarks.length != 0) {
+                        marks = firstMarks;
                     }
-                    
-                }
-                
-            }
-            if (marks.length > 0) {
-                var sel = $("#regionSelector");
-                switch (selectedRegion) {
-                case "East Asia and the Pacific":
-                    sel.val("Region6");
-                    break;
-                case "Europe and Central Asia":
-                    sel.val("Region1");
-                    break;
-                case "Latin America and the Caribbean":
-                    sel.val("Region2");
-                    break;
-                case "Middle East and North Africa":
-                    sel.val("Region3");
-                    break;
-                case "South Asia":
-                    sel.val("Region4");
-                    break;
-                case "Sub-Saharan Africa":
-                    sel.val("Region5");
-                    break;
-                }
-                switchDashboard(sel);
-            }
+                    var selectedRegion = [];
+                    for (var markIndex = 0; markIndex < marks.length; markIndex++) {
+                        var pairs = marks[markIndex].getPairs();
 
+                        for (var pairIndex = 0; pairIndex < pairs.length; pairIndex++) {
+                            var pair = pairs[pairIndex];
+                            if (pair.fieldName == "Region") {
+                                selectedRegion.push(pair.formattedValue);
+                            }
+
+                        }
+
+                    }
+                    switchDashboard(selectedRegion);
+                }
+            }
         }
 
         var currentFilters = ['All'];
@@ -150,31 +124,33 @@
                 ws.applyFilterAsync("Loan Size", filter, tableauSoftware.FilterUpdateType.REPLACE);
                 
             }
-            var filterDescr = '';
-            var hasSme = false;
-            for (var i = 0; i < filter.length; i++) {
-                var f = filter[i];
-                if (f == "All") {
-                    filterDescr = f;
-                    break;
-                } else {
-                    if (f == "Sme") {
-                        hasSme = true;
-                        filterDescr += (filterDescr == '' ? '' : ', ') + "SME";
-                    } else {
-                        if (f == "Small" || f == "Medium") {
-                            filterDescr += (hasSme ? '' : (filterDescr == '' ? '' : ', ') + f);
-                        } else {
-                            filterDescr += (filterDescr == '' ? '' : ', ') + f;
-                        }
-                    }
-                }
-            }
+        //    var filterDescr = '';
+        //    var hasSme = false;
+        //    for (var i = 0; i < filter.length; i++) {
+        //        var f = filter[i];
+        //        if (f == "All") {
+        //            filterDescr = f;
+        //            break;
+        //        } else {
+        //            if (f == "Sme") {
+        //                hasSme = true;
+        //                filterDescr += (filterDescr == '' ? '' : ', ') + "SME";
+        //            } else {
+        //                if (f == "Small" || f == "Medium") {
+        //                    filterDescr += (hasSme ? '' : (filterDescr == '' ? '' : ', ') + f);
+        //                } else {
+        //                    filterDescr += (filterDescr == '' ? '' : ', ') + f;
+        //                }
+        //            }
+        //        }
+        //    }
 
-            $("#loanDescription").text(filterDescr);
+        //    $("#loanDescription").text(filterDescr);
         }
 
-        
+        function onFilterChange(ev) {
+            //alert(ev);
+        }
 
         function initializeDashboard(divId, url, height, width, isDetails) {
             var placeholderDiv = document.getElementById(divId);
@@ -187,8 +163,10 @@
                     var v = ev.getViz();
                     if (!isDetails) {
                         v.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
-                        var sel = $("#regionSelector");
-                        switchDashboard(sel[0]);
+                        initializeDashboard("detailsDashboard", "http://public.tableausoftware.com/views/RegionDashboard-Reachdata/PortfolioComposition", 869, 1004, true);
+                    } else {
+                        v.addEventListener(tableauSoftware.TableauEventName.FILTER_CHANGE, onFilterChange);
+                        
                     }
                 }
 
@@ -197,6 +175,8 @@
             var viz = new tableauSoftware.Viz(placeholderDiv, url, options);
             if (isDetails) {
                 detailsDashboard = viz;
+                
+                
             } else {
                 mapDashboard = viz;
                 
@@ -210,10 +190,22 @@
         }
 
         $(function () {
-            var sel = $("#regionSelector");
-            //switchDashboard(sel[0]);
+            $("#tabs").tabs({
+                activate: function (event, ui) {
+                    switch (event.currentTarget.id) {
+                        case "ag":
+                            detailsDashboard.getWorkbook().activateSheetAsync("Growth trends");
+                            $("#loanSelector").hide();
+                            break;
+                        case "ap":
+                            detailsDashboard.getWorkbook().activateSheetAsync("Portfolio Composition");
+                            $("#loanSelector").show();
+                            break;
+                    }
+                }
+            });
+            
             initializeDashboard("mapDashboard", "http://public.tableausoftware.com/views/PortfolioHighlights/Dashboard2", 600, null, false);
-            //mapDashboard.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
             
         });
 
@@ -227,7 +219,7 @@
             </script>
         </div>
         <div id="main">
-            <h2 style="font-size: 1.6em"> IFC Financing to Micro, Small and Medium Enterprises - Reach Data</h2>
+            <h2 style="font-size: 1.5em"> IFC Financing to Micro, Small and Medium Enterprises - Outreach Data</h2>
             <div>
 
 
@@ -236,11 +228,12 @@
             <div id="data">
                 <div class="section clearfix">
                     <div id="bottom-left">
-                        Lack of access to financial services is a key barrier to the growth of micro, small, medium enterprises (MSMEs). IFC is working to develop solutions to close the MSME financing gap, collaborating with 314 financial institutions across 90 countries globally. By partnering with many types of financial intermediaries, including microfinance institutions (MFIs), commercial banks, leasing companies, and private equity funds, IFC reaches many more small and medium enterprises (SMEs) than it could directly.
+                        Lack of access to financial services is a key barrier to the growth of micro, small, medium enterprises (MSMEs). IFC is working to develop solutions to close the MSME financing gap. By partnering with many types of financial intermediaries, including microfinance institutions (MFIs), commercial banks, leasing companies, and private equity funds, IFC reaches many more small and medium enterprises (SMEs) than it could directly.
                     </div>
-                    <div id="bottom-middle">
-                        
-                    </div>
+                    <!--<div id="bottom-middle">
+                        <div>Collaborating with <strong>314</strong> financial institutions (FIs) across <strong>90</strong> countries globally, including <strong>129</strong> FIs accross <strong>39</strong> International Development Assosiation (IDA) countries </div>
+
+                    </div>-->
                     <div id="bottom-right">
                         <div style="float: right">
                             <h2 class="logo_title" style="font-size: 1.2em">Connect with us</h2>
@@ -267,34 +260,48 @@
                 
             </div>
 
-            <div class="left" style="margin-right: 30px">
+            <!--<div class="left" style="margin-right: 30px; display: none" >
                 <div>
                     Select Region: <select id="regionSelector" onchange="switchDashboard(this)">
-                        <option value="Region1">Region 1</option>
-                        <option value="Region2">Region 2</option>
-                        <option value="Region3">Region 3</option>
-                        <option value="Region4">Region 4</option>
-                        <option value="Region5">Region 5</option>
-                        <option value="Region6">Region 6</option>
-                        <option value="RegionWorld">World</option>
-                    </select>
+                                       <option value="None">None</option>
+                                       <option value="Region1">Region 1</option>
+                                       <option value="Region2">Region 2</option>
+                                       <option value="Region3">Region 3</option>
+                                       <option value="Region4">Region 4</option>
+                                       <option value="Region5">Region 5</option>
+                                       <option value="Region6">Region 6</option>
+                                       <option value="RegionWorld">World</option>
+                                   </select>
                 </div>
-            </div>
-            <div class="left">
+            </div>-->
+            <!--<div class="left">
                 <div id="loanDescriptionWrapper" style="cursor:pointer; height: 24px; padding-top: 5px" onclick="showLoanSizeSelector()">Loan size: <span id="loanDescription">All</span></div>
-                <div id="loanSelector" title="Select loan size" style="display: none">
-                    <div>All <input type="checkbox" id="cbxLoanAll" checked="checked" onchange="loanSizeParameterChanged(this)" value="All" /></div>
-                    <div>Retail <input type="checkbox" id="cbxLoanRetail" checked="checked" onchange="loanSizeParameterChanged(this)" value="Retail" /></div>
-                    <div>Micro <input type="checkbox" id="cbxLoanMicro" checked="checked" onchange="loanSizeParameterChanged(this)" value="Micro" /></div>
-                    <div>SME <input type="checkbox" id="cbxLoanSme" checked="checked" onchange="loanSizeParameterChanged(this)" value="Sme" /></div>
-                    <div style="padding-left: 20px">Small <input type="checkbox" id="cbxLoanSmall" checked="checked" onchange="loanSizeParameterChanged(this)" value="Small" /></div>
-                    <div style="padding-left: 20px">Medium <input type="checkbox" id="cbxLoanMedium" checked="checked" onchange="loanSizeParameterChanged(this)" value="Medium" /></div>
-                    <div>Corporate <input type="checkbox" id="cbxLoanCorporate" checked="checked" onchange="loanSizeParameterChanged(this)" value="Corporate" /></div>
-                </div>
+                
             </div>
-            <div class="clear"></div>
-            <div id="detailsDashboard" style="width: 100%">
+            <div class="clear"></div>-->
+            <div id="detailsNoSelection">Select a Region to see additional details</div>
+            <div id="tabs" style="display: none">
+                <ul>
+                    <li><a id="ap" href="#tabs-1">Portfolio Composition</a></li>
+                    <li><a id="ag" href="#tabs-1">Grouth Trends</a></li>
+                    
+                </ul>
+                <div id="tabs-1">
+                    
+                    <div id="loanSelector" title="Select loan size" >
+                        <div>Select loan size:</div>
+                        <div>All <input type="checkbox" id="cbxLoanAll" checked="checked" onchange="loanSizeParameterChanged(this)" value="All" /></div>
+                        <div>Retail <input type="checkbox" id="cbxLoanRetail" checked="checked" onchange="loanSizeParameterChanged(this)" value="Retail" /></div>
+                        <div>Micro <input type="checkbox" id="cbxLoanMicro" checked="checked" onchange="loanSizeParameterChanged(this)" value="Micro" /></div>
+                        <div>SME <input type="checkbox" id="cbxLoanSme" checked="checked" onchange="loanSizeParameterChanged(this)" value="Sme" /></div>
+                        <div style="padding-left: 20px">Small <input type="checkbox" id="cbxLoanSmall" checked="checked" onchange="loanSizeParameterChanged(this)" value="Small" /></div>
+                        <div style="padding-left: 20px">Medium <input type="checkbox" id="cbxLoanMedium" checked="checked" onchange="loanSizeParameterChanged(this)" value="Medium" /></div>
+                        <div>Corporate <input type="checkbox" id="cbxLoanCorporate" checked="checked" onchange="loanSizeParameterChanged(this)" value="Corporate" /></div>
+                    </div>
+                    <div id="detailsDashboard" style="width: 100%"></div>
+                </d>
             </div>
+            
                 
 
             </div>
