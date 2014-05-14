@@ -124,28 +124,7 @@
                 ws.applyFilterAsync("Loan Size", filter, tableauSoftware.FilterUpdateType.REPLACE);
                 
             }
-        //    var filterDescr = '';
-        //    var hasSme = false;
-        //    for (var i = 0; i < filter.length; i++) {
-        //        var f = filter[i];
-        //        if (f == "All") {
-        //            filterDescr = f;
-        //            break;
-        //        } else {
-        //            if (f == "Sme") {
-        //                hasSme = true;
-        //                filterDescr += (filterDescr == '' ? '' : ', ') + "SME";
-        //            } else {
-        //                if (f == "Small" || f == "Medium") {
-        //                    filterDescr += (hasSme ? '' : (filterDescr == '' ? '' : ', ') + f);
-        //                } else {
-        //                    filterDescr += (filterDescr == '' ? '' : ', ') + f;
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    $("#loanDescription").text(filterDescr);
+        
         }
 
         function onFilterChange(ev) {
@@ -200,6 +179,18 @@
                         case "ap":
                             detailsDashboard.getWorkbook().activateSheetAsync("Portfolio Composition");
                             $("#loanSelector").show();
+                            break;
+                        case "tab3":
+                            detailsDashboard.getWorkbook().activateSheetAsync("Growth trends");
+                            $("#loanSelector").hide();
+                            break;
+                        case "tab4":
+                            detailsDashboard.getWorkbook().activateSheetAsync("Growth trends");
+                            $("#loanSelector").hide();
+                            break;
+                        case "tab5":
+                            detailsDashboard.getWorkbook().activateSheetAsync("Growth trends");
+                            $("#loanSelector").hide();
                             break;
                     }
                 }
@@ -260,31 +251,15 @@
                 
             </div>
 
-            <!--<div class="left" style="margin-right: 30px; display: none" >
-                <div>
-                    Select Region: <select id="regionSelector" onchange="switchDashboard(this)">
-                                       <option value="None">None</option>
-                                       <option value="Region1">Region 1</option>
-                                       <option value="Region2">Region 2</option>
-                                       <option value="Region3">Region 3</option>
-                                       <option value="Region4">Region 4</option>
-                                       <option value="Region5">Region 5</option>
-                                       <option value="Region6">Region 6</option>
-                                       <option value="RegionWorld">World</option>
-                                   </select>
-                </div>
-            </div>-->
-            <!--<div class="left">
-                <div id="loanDescriptionWrapper" style="cursor:pointer; height: 24px; padding-top: 5px" onclick="showLoanSizeSelector()">Loan size: <span id="loanDescription">All</span></div>
-                
-            </div>
-            <div class="clear"></div>-->
+            
             <div id="detailsNoSelection">Select a Region to see additional details</div>
             <div id="tabs" style="display: none">
                 <ul>
                     <li><a id="ap" href="#tabs-1">Portfolio Composition</a></li>
                     <li><a id="ag" href="#tabs-1">Growth Trends</a></li>
-                    
+                    <li><a id="tab3" href="#tabs-1">Tab 3</a></li>
+                    <li><a id="tab4" href="#tabs-1">Tab 4</a></li>
+                    <li><a id="tab5" href="#tabs-1">Tab 5</a></li>
                 </ul>
                 <div id="tabs-1">
                     
