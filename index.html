@@ -7,19 +7,21 @@
     <link href="styles/main.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="Content/themes/base/jquery-ui.css" />
     <script src="http://public.tableausoftware.com/javascripts/api/tableau_v8.js"></script>
-    <script src="scripts/jquery-2.0.3.min.js"></script>
+    <script src="scripts/jquery-2.1.1.min.js"></script>
     <script src="scripts/jquery-ui-1.10.3.min.js"></script>
     <script src="scripts/knockout-2.3.0.js"></script>
-    <script src="scripts/highcharts.js"></script>
-    <script src="scripts/sprintf.js"></script>
+    
     
     <script type="text/javascript">
         var mapDashboard = null;
         var detailsDashboard = null;
         var workbook, activeSheet;
-        function switchDashboard(selectedId) {
-            //var selectedId = $(select).val();
-
+        function switchDashboard(selectedId, hideOnLoad) {
+            if (hideOnLoad) {
+                setTimeout(function () {
+                    switchDashboard(['None']);
+                }, 2000);
+            }
             if (selectedId[0] != "None") {
                 $("#detailsNoSelection").hide();
                 $("#detailsSelection").show();
@@ -49,7 +51,7 @@
                 ws.applyFilterAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
 
             }
-
+            
             
         }
 
@@ -155,6 +157,9 @@
                     if (!isDetails) {
                         v.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
                         initializeDashboard("detailsDashboard", "http://public.tableausoftware.com/views/RegionDashboard-Reachdata/PortfolioComposition", 869, 1004, true);
+                        if (navigator.userAgent.search("Firefox") >= 0) {
+                            switchDashboard(['Europe and Central Asia'], true);
+                        }
                     } else {
                         v.addEventListener(tableauSoftware.TableauEventName.FILTER_CHANGE, onFilterChange);
                         
