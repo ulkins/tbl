@@ -16,7 +16,7 @@
         var mapDashboard = null;
         var detailsDashboard = null;
         var workbook, activeSheet;
-        function switchDashboard(selectedId, hideOnLoad) {
+        function switchDashboard(selectedId, hideOnLoad, changeMap) {
             if (hideOnLoad) {
                 setTimeout(function () {
                     switchDashboard(['None']);
@@ -25,6 +25,7 @@
             if (selectedId[0] != "None") {
                 $("#detailsNoSelection").hide();
                 $("#detailsSelection").show();
+                $("#regionSelector").show();
                 var title = {};
                 for (var i = 0; i < selectedId.length; i++) {
                     title[selectedId[i]] = 1;
@@ -43,6 +44,7 @@
             } else {
                 $("#detailsNoSelection").show();
                 $("#detailsSelection").hide();
+                $("#regionSelector").hide();
             }
 
             var worksheets = detailsDashboard.getWorkbook().getActiveSheet().getWorksheets();
@@ -51,8 +53,17 @@
                 ws.applyFilterAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
 
             }
-            
-            
+
+            if (changeMap) {
+                worksheets = mapDashboard.getWorkbook().getActiveSheet().getWorksheets();
+                for (var i = 0; i < worksheets.length; i++) {
+                    var ws = worksheets[i];
+                    ws.selectMarksAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
+
+                }
+            }
+
+
         }
 
         function onMarksSelection(marksEvent) {
@@ -68,6 +79,7 @@
                 firstMarks = marks;
             } else {
                 if (firstMarks.length == 0 && marks.length == 0) {
+                    $("#regionSelectorCtrl").val('None');
                     switchDashboard(["None"]);
                 } else {
                     if (firstMarks.length != 0) {
@@ -86,6 +98,7 @@
                         }
 
                     }
+                    $("#regionSelectorCtrl").val(selectedRegion[0]);
                     switchDashboard(selectedRegion);
                 }
             }
@@ -270,6 +283,21 @@
 
             
             <div id="detailsNoSelection">Select a Region to see additional details</div>
+            <div id="regionSelector" style="margin-right: 30px;display: none" >
+        <div>
+            Select Region: <select id="regionSelectorCtrl" onchange="switchDashboard([$(this).val()], false, true)">
+                               <option value="None">None</option>
+                               <option value="East Asia and the Pacific">East Asia and the Pacific</option>
+                               <option value="Europe and Central Asia">Europe and Central Asia</option>
+                               <option value="Latin America and the Caribbean">Latin America and the Caribbean</option>
+                               <option value="Middle East and North Africa">Middle East and North Africa</option>
+                               <option value="South Asia">South Asia</option>
+                               <option value="Sub-Saharan Africa">Sub-Saharan Africa</option>
+                               
+                           </select>
+        </div>
+    </div>
+
 
             <div id="detailsSelection" style="display: none">
                 <div id="detailsTitle" class="detailsTitle"></div>
